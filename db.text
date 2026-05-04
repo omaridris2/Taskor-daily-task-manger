@@ -1,0 +1,12 @@
+postgresql://neondb_owner:npg_9zc7GHqxvIRE@ep-raspy-thunder-alnjur67.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require
+
+Host
+ep-raspy-thunder-alnjur67.c-3.eu-central-1.aws.neon.tech
+Database
+neondb
+Role
+neondb_owner
+Password
+************
+Pooler host
+ep-raspy-thunder-alnjur67-pooler.c-3.eu-central-1.aws.neon.tech
