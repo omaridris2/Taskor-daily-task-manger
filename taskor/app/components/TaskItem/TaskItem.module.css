@@ -1,0 +1,31 @@
+ .listitem {
+  list-style: none;
+  padding: 12px 16px;
+  margin: 8px 0;
+
+  background-color: #1f2937; /* dark gray */
+  color: #ffffff;
+
+  border-radius: 8px;
+  cursor: grab;
+
+  display: flex;
+  align-items: center;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.listitem:active {
+  cursor: grabbing;
+  transform: scale(1.02);
+}
+
+.listitem:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Optional: when dragging (if you later add isDragging state) */
+.dragging {
+  opacity: 0.6;
+  transform: rotate(2deg);
+}
