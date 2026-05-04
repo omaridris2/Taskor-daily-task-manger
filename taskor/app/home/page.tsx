@@ -1,68 +1,75 @@
 "use client";
 import { useState } from "react";
 import styles from "./Home.module.css";
-import {useDraggable} from '@dnd-kit/react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
 import { TaskItem } from "../components/TaskItem/TaskItem";
-import { Droppable } from "../components/dropable/DropAble";
-import { DragDropProvider } from "@dnd-kit/react";
-export default function HomePage() {
- /* const [tasks, setTasks] = useState<any[]>([]);*/
-   const [isDropped, setIsDropped] = useState(false);
-  
-  const {ref} = useDraggable({
-    id: 'draggable',
-  });
-/*
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch("/api/tasks");
 
-      if (!res.ok) {
-        console.error("API error:", res.status, res.statusText);
-        return;
-      }
-
-      const data = await res.json();
-      setTasks(data);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    }
-  };
-*/
-  const MOCK_TASKS = [
-  { id: "1", name: "Buy groceries" },
-  { id: "2", name: "Finish project" },
-  { id: "3", name: "Read a book" },
-  { id: "4", name: "Workout" },
+const MOCK_TASKS = [
+  { id: "1", name: "Buy groceries", level: 1 },
+  { id: "2", name: "Finish project", level: 2 },
+  { id: "3", name: "Read a book", level: 3 },
+  { id: "4", name: "Workout", level: 4 },
 ];
-const [tasks, setTasks] = useState<any[]>(MOCK_TASKS);
+
+export default function HomePage() {
+  const [tasks, setTasks] = useState(MOCK_TASKS);
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setTasks((prev) => {
+      const oldIndex = prev.findIndex((t) => t.id === active.id);
+      const newIndex = prev.findIndex((t) => t.id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  }
+
+  function handleSort(ascending: boolean) {
+    // Apply sort directly into state so drag works from the new order
+    setTasks((prev) =>
+      [...prev].sort((a, b) => ascending ? a.level - b.level : b.level - a.level)
+    );
+  }
 
   return (
     <div className={styles.container}>
-      <button className={styles.button} /*onClick={fetchTasks}*/ >
-        Fetch Tasks
+      <button className={styles.button} onClick={() => handleSort(true)}>
+        Sort Ascending
       </button>
-      
-       <DragDropProvider
-        onDragEnd={(event) => {
-          if (event.canceled) return;
-          const { target } = event.operation;
-          setIsDropped(target?.id === "droppable");
-        }}
-      >
-        <ul className={styles.list}>
-          {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
-          ))}
-        </ul>
+      <button className={styles.button} onClick={() => handleSort(false)}>
+        Sort Descending
+      </button>
 
-        <Droppable id="droppable">
-          {isDropped && tasks.length > 0 && (
-            <TaskItem task={tasks[tasks.length - 1]} />
-          )}
-        </Droppable>
-      </DragDropProvider>
-      
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={tasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <ul className={styles.list}>
+            {tasks.map((task) => (
+              <TaskItem key={task.id} task={task} />
+            ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }
